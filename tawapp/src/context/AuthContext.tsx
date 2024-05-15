@@ -42,10 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const checkAuthUser = async () => {
     setIsLoading(true);
     try {
-      console.log('Checking auth user...');
       const currentAccount = await getCurrentUser();
-      console.log('Current Account:', currentAccount);
-
       if (currentAccount) {
         setUser({
           id: currentAccount.$id,
@@ -56,12 +53,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           bio: currentAccount.bio,
         });
         setIsAuthenticated(true);
+
         return true;
       }
 
       return false;
     } catch (error) {
-      console.error('Error checking auth user:', error);
+      console.error(error);
       return false;
     } finally {
       setIsLoading(false);
@@ -70,7 +68,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const cookieFallback = localStorage.getItem("cookieFallback");
-    if (cookieFallback === "[]") {
+    if (
+      cookieFallback === "[]" 
+      // cookieFallback === null ||
+      // cookieFallback === undefined
+    ) {
       navigate("/sign-in");
     }
 
