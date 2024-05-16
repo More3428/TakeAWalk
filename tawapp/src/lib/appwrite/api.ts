@@ -13,7 +13,7 @@ export async function createUserAccount(user: INewUser) {
 
         if (!newAccount) throw new Error("Failed to create new account.");
 
-        const avatarUrl = avatars.getInitials(user.name).toString(); // Convert URL to string
+        const avatarUrl = avatars.getInitials(user.name);
 
         const newUser = await saveUserToDB({
             accountId: newAccount.$id,
@@ -34,7 +34,7 @@ export async function saveUserToDB(user: {
     accountId: string;
     email: string;
     name: string;
-    imageUrl: string;
+    imageUrl: URL;
     username?: string;
 }) {
     try {
@@ -42,7 +42,7 @@ export async function saveUserToDB(user: {
             appwriteConfig.databaseId,
             appwriteConfig.userCollectionId,
             ID.unique(),
-            user,
+            user
         );
 
         return newUser;
@@ -54,7 +54,12 @@ export async function saveUserToDB(user: {
 
 export async function signInAccount(user: { email: string; password: string; }) {
     try {
-        const session = await account.createSession(user.email, user.password);
+        console.log("Attempting to sign in:", user); // Log the attempt to sign in
+
+        const session = await account.createEmailPasswordSession(user.email, user.password);
+
+        console.log("Session created:", session); // Log the created session
+
         return session;
     } catch (error) {
         console.error("Error in signInAccount:", error);
