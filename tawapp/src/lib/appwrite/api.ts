@@ -56,6 +56,16 @@ export async function signInAccount(user: { email: string; password: string; }) 
     try {
         console.log("Attempting to sign in:", user); // Log the attempt to sign in
 
+        // Check for existing sessions
+        const currentSession = await account.getSession('current').catch(() => null);
+
+        if (currentSession) {
+            // If a session exists, delete it
+            await account.deleteSession('current');
+            console.log("Existing session deleted.");
+        }
+
+        // Create a new session using email and password
         const session = await account.createEmailPasswordSession(user.email, user.password);
 
         console.log("Session created:", session); // Log the created session
