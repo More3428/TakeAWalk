@@ -51,6 +51,8 @@ const SignupForm = () => {
         password: user.password,
       });
 
+      console.log("Session Data:", session); // Log session data to verify
+
       if (!session) {
         toast({ title: "Something went wrong. Please login your new account", });
         
@@ -60,6 +62,8 @@ const SignupForm = () => {
       }
 
       const isLoggedIn = await checkAuthUser();
+
+      console.log("Is Logged In:", isLoggedIn); // Log isLoggedIn to verify
 
       if (isLoggedIn) {
         form.reset();
@@ -71,6 +75,7 @@ const SignupForm = () => {
       }
     } catch (error) {
       console.log({ error });
+      toast({ title: "An error occurred. Please try again." });
     }
   };
 
