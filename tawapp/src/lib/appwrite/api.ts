@@ -135,31 +135,6 @@ export async function uploadFile(file: File) {
     }
 }
 
-export async function createPost(post: INewPost) {
-    try {
-        //upload image to storage
-        const uploadedFile = await uploadFile(post.file[0]);
-
-        if(!uploadedFile) throw Error;
-
-        //Get file url
-        const fileUrl = getFilePreview(uploadedFile.$id);
-
-
-        if(!fileUrl) {
-            deleteFile(uploadedFile.$id)
-            throw Error;
-        }
-
-        //Convert tags into an array
-        
-    } catch (error) {
-        console.log(error)
-    }
-}
-
-
-
 export async function getFilePreview(fileId: string) {
     try {
       const fileUrl = storage.getFilePreview(
@@ -170,6 +145,7 @@ export async function getFilePreview(fileId: string) {
         ImageGravity.Top,
         100
       );
+      if (!fileUrl) throw Error;
         return fileUrl;
     } catch(error) {
         console.log(error);
@@ -185,3 +161,78 @@ export async function deleteFile(fileId: string){
         console.log(error);
     }
 }
+
+export async function createPost(post: INewPost) {
+    try {
+        // Upload image to storage
+        const uploadedFile = await uploadFile(post.file[0]);
+        if (!uploadedFile) throw new Error("File upload failed");
+
+        // Log the uploaded file details
+        console.log("Uploaded File:", uploadedFile);
+
+        // Get file URL
+        const fileUrl = await getFilePreview(uploadedFile.$id);
+        if (!fileUrl) {
+            await deleteFile(uploadedFile.$id);
+            throw new Error("File preview URL generation failed");
+        }
+
+        // Log the file URL
+        console.log("File URL:", fileUrl);
+
+      
+
+        // Convert tags into an array
+        const tags = post.tags?.replace(/ /g, '').split(',') || [];
+
+        // Log the tags array
+        console.log("Tags:", tags);
+
+        // Prepare document data
+        const documentData = {
+            creator: post.userId,
+            caption: post.caption,
+            imageUrl: fileUrl,
+            imageId: uploadedFile.$id,
+            location: post.location,
+            tags: tags,
+        };
+
+        // Log the document data
+        console.log("Document Data:", documentData);
+
+        // Save post to database
+        const newPost = await databases.createDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            ID.unique(),
+            documentData
+        );
+
+        if (!newPost) {
+            await deleteFile(uploadedFile.$id);
+            throw new Error("Failed to create new post document");
+        }
+
+        return newPost;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function getRecentPosts(){
+    try {
+        const posts = await databases.listDocuments(
+          appwriteConfig.databaseId,
+          appwriteConfig.postCollectionId,
+          [Query.orderDesc("$createdAt"), Query.limit(20)]
+        );
+    
+        if (!posts) throw Error;
+    
+        return posts;
+      } catch (error) {
+        console.log(error);
+      }
+    }
