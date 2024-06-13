@@ -1,6 +1,7 @@
 import PostForm from '@/components/forms/PostForm'
 import Loader from '@/components/shared/loader';
 import { useGetPostById } from '@/lib/react-query/queriesAndMutations';
+import { Models } from 'appwrite';
 import { useParams } from 'react-router-dom';
 
 
@@ -10,7 +11,9 @@ const EditPost = () => {
 
   if(isPending) return <Loader />
 
+  const typedPost = post as Models.Document | undefined;
 
+ 
   return (
     <div className="flex flex-1">
       <div className="common-container">
@@ -26,7 +29,7 @@ const EditPost = () => {
           </h2>
         </div>
 
-        {isPending ? <Loader /> : <PostForm action="Update" post={post} />}
+        <PostForm action="Update" post={typedPost} />
       </div>
     </div>
   )

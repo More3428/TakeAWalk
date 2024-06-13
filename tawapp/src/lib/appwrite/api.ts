@@ -337,17 +337,16 @@ export async function updatePost(post: IUpdatePost) {
 
 
         // Save post to database
-        const updatedPost = await databases.createDocument(
+        const updatedPost = await databases.updateDocument(
             appwriteConfig.databaseId,
             appwriteConfig.postCollectionId,
             post.postId,
             {
-                
                 caption: post.caption,
                 imageUrl: image.imageUrl,
                 imageId: image.imageId,
                 location: post.location,
-                tags: tags,
+                tags: tags
             }
 
         );
@@ -373,6 +372,8 @@ export async function deletePost(postId: string, imageId: string) {
             appwriteConfig.postCollectionId,
             postId
         )
+
+        return { status: 'ok'}
 
     } catch(error) {
         console.log(error); 
